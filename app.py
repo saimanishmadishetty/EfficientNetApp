@@ -7,10 +7,10 @@ import base64
 import io
 
 # Set the title and description
-st.title("EfficientNet Object Detection")
+st.title("EfficientNet Image Classification")
 st.markdown("""
-    Upload an image and let the EfficientNet model detect objects in it.
-    This model can identify a variety of objects.
+    Upload an image and let the EfficientNet model classify it.
+    This model can identify a variety of objects and scenes.
 """)
 
 # Upload image file
@@ -28,22 +28,28 @@ if uploaded_file is not None:
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     
     input_data = img_str
-    if st.button('🔍 Detect'):
+    if st.button('🔍 Classify'):
         try:
             api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
-            
-            # Extract class and confidence
-            detected_class = api_response[0]
+            detected_classes = api_response[0].split(', ')
             confidence = api_response[1]
             
             # Display the result with styling
-            st.markdown(f"""
+            st.markdown("""
                 <div style="text-align: center; margin-top: 20px;">
                     <p style="font-size: 24px; color: #333;"><strong>Prediction:</strong></p>
-                    <p style="font-size: 20px; color: #4CAF50;">Class: {detected_class}</p>
+            """, unsafe_allow_html=True)
+            
+            for detected_class in detected_classes:
+                st.markdown(f"""
+                    <p style="font-size: 20px; color: #4CAF50;">{detected_class}</p>
+                """, unsafe_allow_html=True)
+                
+            st.markdown(f"""
                     <p style="font-size: 20px; color: #FF5733;">Confidence: {confidence:.2%}</p>
                 </div>
             """, unsafe_allow_html=True)
+
         except UnauthorizedException:
             st.error("Unauthorized exception")
         except NotFoundException as e:
