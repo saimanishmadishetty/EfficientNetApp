@@ -16,25 +16,69 @@ st.markdown("""
 # Upload image file
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
+# Center the classify button
+st.markdown("""
+    <style>
+        .stButton button {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+        }
+        .stButton button:hover {
+            background-color: #45a049;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+if st.button('🔍 Classify'):
+    st.session_state.classify = True
+else:
+    st.session_state.classify = False
+
 if uploaded_file is not None:
     vps_model_client = model.ModelClient()
     model_id = "mdl-i5bsdoczyhmkp"
     image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image', use_column_width=True)
-
+    
     # Convert the image to base64
     buffered = io.BytesIO()
     image.save(buffered, format="JPEG")
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     
     input_data = img_str
-    if st.button('🔍 Classify'):
+
+    if st.session_state.classify:
         try:
             api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
             detected_classes = api_response[0].split(', ')
             confidence = api_response[1]
-            
-            # Display the result with styling
+        except UnauthorizedException:
+            st.error("Unauthorized exception")
+        except NotFoundException as e:
+            st.error(f"Not found exception: {str(e)}")
+        except RateLimitExceededException:
+            st.error("Rate limit exceeded exception")
+        except Exception as e:
+            st.error(f"Exception when calling model->predict: {str(e)}")
+    else:
+        detected_classes = []
+        confidence = 0.0
+
+    # Layout for image and prediction
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+
+    with col2:
+        if st.session_state.classify:
             st.markdown("""
                 <div style="text-align: center; margin-top: 20px;">
                     <p style="font-size: 24px; color: #333;"><strong>Prediction:</strong></p>
@@ -49,15 +93,13 @@ if uploaded_file is not None:
                     <p style="font-size: 20px; color: #FF5733;">Confidence: {confidence:.2%}</p>
                 </div>
             """, unsafe_allow_html=True)
-
-        except UnauthorizedException:
-            st.error("Unauthorized exception")
-        except NotFoundException as e:
-            st.error(f"Not found exception: {str(e)}")
-        except RateLimitExceededException:
-            st.error("Rate limit exceeded exception")
-        except Exception as e:
-            st.error(f"Exception when calling model->predict: {str(e)}")
+        else:
+            st.markdown("""
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="font-size: 24px; color: #333;"><strong>Prediction:</strong></p>
+                    <p style="font-size: 20px; color: #FF5733;">Upload an image and click "Classify" to see the prediction.</p>
+                </div>
+            """, unsafe_allow_html=True)
 
 # Add some styling with Streamlit's Markdown
 st.markdown("""
