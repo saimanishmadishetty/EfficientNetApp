@@ -2,16 +2,52 @@ import streamlit as st
 from PIL import Image
 from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
-import json
 import base64
 import io
 
-# Set the title and description
-st.title("Image Classification App")
+# Set the title and description with new font style
 st.markdown("""
-    Upload an image and let the EfficientNet model classify it.
-    This model can identify a variety of objects and scenes.
-""")
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        html, body, [class*="css"] {
+            font-family: 'Roboto', sans-serif;
+        }
+        .title {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            text-align: center;
+        }
+        .description {
+            font-size: 1.25rem;
+            color: #555;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .uploaded-image {
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+        }
+        .prediction-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .prediction-title {
+            font-size: 24px;
+            color: #333;
+        }
+        .prediction-class {
+            font-size: 20px;
+            color: #4CAF50;
+        }
+        .confidence {
+            font-size: 20px;
+            color: #FF5733;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="title">Image Classification App</div>', unsafe_allow_html=True)
+st.markdown('<div class="description">Upload an image and let the EfficientNet model classify it. This model can identify a variety of objects and scenes.</div>', unsafe_allow_html=True)
 
 # Upload image file
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
@@ -79,20 +115,14 @@ if uploaded_file is not None:
 
     with col2:
         if st.session_state.classify:
-            st.markdown("""
-                <div style="text-align: center; margin-top: 20px;">
-                    <p style="font-size: 24px; color: #333;"><strong>Prediction:</strong></p>
-            """, unsafe_allow_html=True)
+            st.markdown('<div style="text-align: center; margin-top: 20px;">', unsafe_allow_html=True)
+            st.markdown('<p style="font-size: 24px; color: #333;"><strong>Prediction:</strong></p>', unsafe_allow_html=True)
             
             for detected_class in detected_classes:
-                st.markdown(f"""
-                    <p style="font-size: 20px; color: #4CAF50;">{detected_class}</p>
-                """, unsafe_allow_html=True)
+                st.markdown(f'<p style="font-size: 20px; color: #4CAF50;">{detected_class}</p>', unsafe_allow_html=True)
                 
-            st.markdown(f"""
-                    <p style="font-size: 20px; color: #FF5733;">Confidence: {confidence:.2%}</p>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f'<p style="font-size: 20px; color: #FF5733;">Confidence: {confidence:.2%}</p>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.markdown("""
                 <div style="text-align: center; margin-top: 20px;">
@@ -119,26 +149,6 @@ st.markdown("""
         .stApp > main {
             margin-top: 4rem;
             padding: 2rem;
-        }
-        .stTitle, .stMarkdown, .stButton, .stImage {
-            text-align: center;
-        }
-        .stButton > button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 24px;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-        }
-        .stButton > button:hover {
-            background-color: #45a049;
-        }
-        .stImage > img {
-            border: 2px solid #4CAF50;
-            border-radius: 8px;
         }
         pre {
             background: #e0f7fa;
