@@ -7,7 +7,7 @@ import base64
 import io
 
 # Set the title and description
-st.title("EfficientNet Image Classification")
+st.title("Image Classification App")
 st.markdown("""
     Upload an image and let the EfficientNet model classify it.
     This model can identify a variety of objects and scenes.
